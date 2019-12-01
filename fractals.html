@@ -1,0 +1,119 @@
+<!doctype html>
+
+<html style="height: 100%;">
+
+<head>
+	<meta charset="utf-8">
+	<title>Fractals</title>
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+		integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+		crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+		integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+		crossorigin="anonymous"></script>
+	<script src="https://d3js.org/d3.v5.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+		integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+		crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+		integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<body class="h-100">
+	<ul class="nav nav-tabs" id="myTab" role="tablist">
+		<li class="nav-item">
+			<a class="nav-link active" id="mod256-tab" data-toggle="tab" href="#mod256" role="tab" aria-controls="mod256"
+				aria-selected="false">mod256</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="fractals-tab" data-toggle="tab" href="#fractals" role="tab"
+				aria-controls="fractals" aria-selected="true">Fractals</a>
+		</li>
+	</ul>
+	<div class="tab-content h-75" id="myTabContent">
+		<div class="tab-pane fade" id="fractals" role="tabpanel" aria-labelledby="fractals-tab">
+
+		</div>
+		<div class="container-fluid tab-pane fade h-100 show active" id="mod256" role="tabpanel" aria-labelledby="mod256-tab">
+			<div class="row h-100">
+				<div class="col-md-9 p-1 h-100">
+					<div class="w-100 h-100 border border-primary" id="mod256CanvasContainer">
+					</div>
+				</div>
+				<div class="col-md-3 p-1" style="padding: 15px;">
+					<div>
+						<label for="redFormula">red formula:</label><br />
+						<input type="text" id="redFormula">
+					</div>
+					<div>
+						<label for="greenFormula">green formula:</label><br />
+						<input type="text" id="greenFormula">
+					</div>
+					<div>
+						<label for="blueFormula">blue formula:</label><br />
+						<input type="text" id="blueFormula">
+					</div>
+					<div>
+						<label for="alphaFormula">alpha formula:</label><br />
+						<input type="text" id="alphaFormula">
+					</div>
+					<button onclick="calculate()">DO IT</button><br />
+					<span id="calcTime">0</span> ms
+				</div>
+				<script type="text/javascript">
+					let mod256CanvasContainer = document.getElementById("mod256CanvasContainer");
+					let currentImageData;
+					let mod256Canvas;
+					let mod256Context;
+
+					function initMod256(){
+						if(!mod256Canvas){
+							mod256Canvas = mod256CanvasContainer
+								.appendChild(document.createElement('canvas'));
+							mod256Context = mod256Canvas.getContext("2d");
+						}
+						mod256Canvas.width = mod256CanvasContainer.clientWidth;
+						mod256Canvas.height = mod256CanvasContainer.clientHeight;
+						if(currentImageData) draw(mod256Context, currentImageData)
+					}
+
+					function calculate() {
+						if(!mod256Canvas) initMod256();
+						let redFn = new Function('x', 'y', 'return ' + document.getElementById('redFormula').value)
+						let greenFn = new Function('x', 'y', 'return ' + document.getElementById('greenFormula').value)
+						let blueFn = new Function('x', 'y', 'return ' + document.getElementById('blueFormula').value)
+						let alphaFn = new Function('x', 'y', 'return ' + document.getElementById('alphaFormula').value)
+						let time = new Date().getMilliseconds();
+						currentImageData = mod256Context.createImageData(mod256Canvas.clientWidth, mod256Canvas.clientHeight);
+						let xMin = -3, xMax = 3, yMin = xMin * mod256Canvas.clientHeight / mod256Canvas.clientWidth, yMax = xMax * mod256Canvas.clientHeight / mod256Canvas.clientWidth;
+						for (let x = 0; x < mod256Canvas.clientWidth; x++) {
+							for (let y = 0; y < mod256Canvas.clientHeight; y++) {
+								setPixel(currentImageData, x, y, redFn(x, y) % 256, greenFn(x, y) % 256, blueFn(x, y) % 256, alphaFn(x, y) % 256);
+							}
+						}
+
+						draw(mod256Context, currentImageData);
+						time = new Date().getMilliseconds() - time;
+						document.getElementById("calcTime").innerHTML = time;
+					}
+
+					function draw(context, imageData){
+						context.putImageData(imageData, 0, 0);
+					}
+
+					function setPixel(imageData, x, y, r, g, b, a) {
+						var index = (x + y * imageData.width);
+						imageData.data[index * 4 + 0] = r;
+						imageData.data[index * 4 + 1] = g;
+						imageData.data[index * 4 + 2] = b;
+						imageData.data[index * 4 + 3] = a;
+					}
+
+					window.onresize = initMod256
+				</script>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

@@ -1,0 +1,3 @@
+[
+    "Math.sin(Math.sqrt(Math.sin(x*x + y*y)) * 255) * 255"
+]
